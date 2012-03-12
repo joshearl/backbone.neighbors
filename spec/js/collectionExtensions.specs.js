@@ -8,7 +8,7 @@
       name: "Default Name"
     });
 
-    EmployeeCollection = Backbone.Collection.extend({
+    EmployeeCollection = Backbone.NeighborlyCollection.extend({
       model: Employee,
       initialize: function () {
         this.add(new Employee( { name: "Jim Halpert"})); 
@@ -24,24 +24,26 @@
     expect(employeeCollection.models.length).toEqual(3);
   });
 
-  it("should add an addWithNeighbors method to the Collection object", function () {
-    expect(employeeCollection.addWithNeighbors).toBeTruthy();
+  it("should have an add method on the Collection object", function () {
+    expect(employeeCollection.add).toBeTruthy();
   });
 
-  describe("adding a new model", function () {
+  describe("appending a new model to the collection", function () {
 
-    var pam;
+    var pam
+    ,   preceeding;
 
     beforeEach(function () {
       pam = new Employee({ name: "Pam Beesly" });
-      employeeCollection.addWithNeighbors(pam);
+      preceeding = _.last(employeeCollection.models);
+      employeeCollection.add(pam);
     });
 
     it("should add the new model to the collection", function () {
       expect(employeeCollection.models.length).toEqual(4);
     });
 
-    it("should set the previousNeighbor propery", function () {
+    it("should set the previousNeighbor propery of the current model", function () {
       expect(pam.get("previousNeighbor")).toBeTruthy();
     });
 
@@ -49,10 +51,13 @@
       expect(pam.get("previousNeighbor")).toBe(employeeCollection.models[2]);
     });
 
-    it("it should set the nextNeighbor property to an empty object when appending to the end of the collection", function () {
-      expect(pam.get("nextNeighbor")).toEqual({});
+    it("it should leave the current item's nextNeighbor property undefined", function () {
+      expect(pam.get("nextNeighbor")).toBeUndefined();
     });
 
+    it("it should update the nextNeighbor property of the preceeding item", function () {
+      expect(preceeding.get('nextNeighbor')).toBe(pam);
+    });
 
   });
 
@@ -64,7 +69,7 @@
     beforeEach(function () {
       index = 1;
       stanley = new Employee({ name: "Stanley Hudson" });
-      employeeCollection.addWithNeighbors(stanley, { at: index });
+      employeeCollection.add(stanley, { at: index });
     });
 
     it("should add the new model to the collection at the specified index", function () {
@@ -80,4 +85,41 @@
     });
 
   });
+
+  describe("removing an existing model", function () {
+
+    var index,
+        employee,
+        previous,
+        next,
+        cid;
+
+    beforeEach(function () {
+      index = 1;
+      employee = employeeCollection.at(index);
+      cid = employee.cid;
+      previous = employee.get('previousNeighbor');
+      next = employee.get('nextNeighbor');
+      employeeCollection.remove(employee);
+    });
+
+    it("should remove the model from the collection", function () {
+      expect(employeeCollection.getByCid(cid)).toBeUndefined();
+    });
+
+    it("should update the nextNeighbor attribute of the preceeding item", function () {
+      expect(previous.get('nextNeighbor')).toBe(next);
+    });
+
+    it("should update the previousNeighbor attribute of the next item", function () {
+      expect(next.get('previousNeighbor')).toBe(previous);
+    });
+
+  });
+
+  describe('destroying an existing model', function () {
+    // it should update the next and previous neighbors when a collection item is destroyed
+
+  });
+
 });

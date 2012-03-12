@@ -1,6 +1,6 @@
-﻿(function (Backbone, _, $) {
+﻿Backbone.NeighborlyCollection = Backbone.Collection.extend ({
 
-  Backbone.Collection.prototype.addWithNeighbors = function (model, options) {
+  add : function (model, options) {
 
     if (!_.isUndefined(options) && !_.isUndefined(options.at)) {
       model.set({
@@ -10,11 +10,24 @@
     } else {
       model.set({
         previousNeighbor: _.last(this.models),
-        nextNeighbor: {}
+        nextNeighbor: undefined 
       });
     }
 
-    this.add(model, options);
-  };
+    Backbone.Collection.prototype.add.call(this, model, options);
 
-})(Backbone, _, jQuery);
+    var index = _.indexOf(this.models, model);
+
+    if (index > 0) {
+      this.models[index - 1].set({ nextNeighbor: model });
+    }
+  },
+
+  remove: function (model, options) {
+    var preceedingModel = model.get('previousNeighbor');
+    var nextModel = model.get('nextNeighbor');
+    Backbone.Collection.prototype.remove.call(this, model, options);
+    preceedingModel.set({ nextNeighbor: nextModel });
+    nextModel.set({ previousNeighbor: preceedingModel });
+  }
+});
