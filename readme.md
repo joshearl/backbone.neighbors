@@ -1,4 +1,4 @@
-﻿# Backbone.Neighbors
+﻿## Backbone.Neighbors
 
 Backbone.Neighbors is an extension for Backbone.js designed to make it easier to manage adjacent items 
 in a collection. It adds `next` and `previous` methods to the collection that return references to the items 
