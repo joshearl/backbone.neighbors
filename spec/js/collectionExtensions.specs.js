@@ -28,6 +28,35 @@
     expect(employeeCollection.add).toBeTruthy();
   });
 
+  describe('defaults to creating a collection without setting neighbors', function () {
+    var employeeCollection
+    ,   index = 1;
+
+    beforeEach(function() {
+
+      Employee = Backbone.Model.extend({
+        name: "Default Name"
+      });
+
+      EmployeeCollection = Backbone.NeighborlyCollection.extend({
+        model: Employee,
+        initialize: function () {
+          this.add(new Employee( { name: "Jim Halpert"})); 
+          this.add(new Employee( { name: "Dwight Schrute"})); 
+          this.add(new Employee({ name: "Michael Scott" }));
+        },
+      });
+
+      employeeCollection = new EmployeeCollection;
+    });
+
+    it("should not set nextNeighbor property by default", function () {
+      expect(employeeCollection.models[index].get('nextNeighbor')).toBeUndefined();
+    });
+
+  });
+
+
   describe("appending a new model to the collection", function () {
 
     var pam
@@ -118,7 +147,32 @@
   });
 
   describe('destroying an existing model', function () {
-    // it should update the next and previous neighbors when a collection item is destroyed
+    var index,
+        employee,
+        previous,
+        next,
+        cid;
+
+    beforeEach(function () {
+      index = 1;
+      employee = employeeCollection.at(index);
+      cid = employee.cid;
+      previous = employee.get('previousNeighbor');
+      next = employee.get('nextNeighbor');
+      employee.destroy();
+    });
+
+    it("should remove the model from the collection", function () {
+      expect(employeeCollection.getByCid(cid)).toBeUndefined();
+    });
+    
+    it("should update the nextNeighbor attribute of the preceeding item", function () {
+      expect(previous.get('nextNeighbor')).toBe(next);
+    });
+    
+    it("should update the previousNeighbor attribute of the next item", function () {
+      expect(next.get('previousNeighbor')).toBe(previous);
+    });
 
   });
 

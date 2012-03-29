@@ -16,6 +16,7 @@
 
     Backbone.Collection.prototype.add.call(this, model, options);
 
+    // Could probably get the index value from options.index (see Backbone documentation)
     var index = _.indexOf(this.models, model);
 
     if (index > 0) {
