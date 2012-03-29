@@ -8,7 +8,7 @@
       name: "Default Name"
     });
 
-    EmployeeCollection = Backbone.NeighborlyCollection.extend({
+    EmployeeCollection = Backbone.Collection.extend({
       model: Employee,
       initialize: function () {
         this.add(new Employee( { name: "Jim Halpert"})); 
@@ -28,152 +28,44 @@
     expect(employeeCollection.add).toBeTruthy();
   });
 
-  describe('defaults to creating a collection without setting neighbors', function () {
-    var employeeCollection
-    ,   index = 1;
+  describe('previous method returns item immediatedly before current item', function () {
 
-    beforeEach(function() {
-
-      Employee = Backbone.Model.extend({
-        name: "Default Name"
-      });
-
-      EmployeeCollection = Backbone.NeighborlyCollection.extend({
-        model: Employee,
-        initialize: function () {
-          this.add(new Employee( { name: "Jim Halpert"})); 
-          this.add(new Employee( { name: "Dwight Schrute"})); 
-          this.add(new Employee({ name: "Michael Scott" }));
-        },
-      });
-
-      employeeCollection = new EmployeeCollection;
+    it('should have a previous method', function () {
+      expect(employeeCollection.previous).toBeTruthy();
     });
 
-    it("should not set nextNeighbor property by default", function () {
-      expect(employeeCollection.models[index].get('nextNeighbor')).toBeUndefined();
+    it('should return a result when invoked with an item in the collection', function () {
+      var dwight = employeeCollection.models[1],
+          expected = employeeCollection.models[0], 
+          result = employeeCollection.previous(dwight);
+
+      expect(expected).toEqual(result);
     });
 
+    it('should return undefined when called with the first item in the collection', function () {
+      var first = employeeCollection.models[0],
+          result = employeeCollection.previous(first);
+      expect(result).toBeUndefined();
+    });
   });
 
-
-  describe("appending a new model to the collection", function () {
-
-    var pam
-    ,   preceeding;
-
-    beforeEach(function () {
-      pam = new Employee({ name: "Pam Beesly" });
-      preceeding = _.last(employeeCollection.models);
-      employeeCollection.add(pam);
+  describe('next method returns item immediatedly following the current item', function () {
+    it('should have a next method', function () {
+      expect(employeeCollection.next).toBeTruthy();
     });
 
-    it("should add the new model to the collection", function () {
-      expect(employeeCollection.models.length).toEqual(4);
+    it('should return a result when invoked with an item in the collection', function () {
+      var dwight = employeeCollection.models[1],
+          expected = employeeCollection.models[2],
+          result = employeeCollection.next(dwight);
+
+      expect(expected).toEqual(result);
     });
 
-    it("should set the previousNeighbor propery of the current model", function () {
-      expect(pam.get("previousNeighbor")).toBeTruthy();
+    it('should return undefined when called with the last item in the collection', function () {
+      var last = employeeCollection.models[2],
+          result = employeeCollection.next(last);
+      expect(result).toBeUndefined();
     });
-
-    it("should set the previousNeighbor propery to be the last model in the collection", function () {
-      expect(pam.get("previousNeighbor")).toBe(employeeCollection.models[2]);
-    });
-
-    it("it should leave the current item's nextNeighbor property undefined", function () {
-      expect(pam.get("nextNeighbor")).toBeUndefined();
-    });
-
-    it("it should update the nextNeighbor property of the preceeding item", function () {
-      expect(preceeding.get('nextNeighbor')).toBe(pam);
-    });
-
   });
-
-  describe("inserting a new model", function () {
-
-    var stanley,
-        index;
-
-    beforeEach(function () {
-      index = 1;
-      stanley = new Employee({ name: "Stanley Hudson" });
-      employeeCollection.add(stanley, { at: index });
-    });
-
-    it("should add the new model to the collection at the specified index", function () {
-      expect(employeeCollection.models[index]).toEqual(stanley);
-    });
-
-    it("should set the nextNeighbor property to the next model in the list", function () {
-      expect(stanley.get("nextNeighbor")).toBe(employeeCollection.models[index + 1]);
-    });
-
-    it("should set the previousNeighbor property to the preceeding model in the list", function () {
-      expect(stanley.get("previousNeighbor")).toBe(employeeCollection.models[index - 1]);
-    });
-
-  });
-
-  describe("removing an existing model", function () {
-
-    var index,
-        employee,
-        previous,
-        next,
-        cid;
-
-    beforeEach(function () {
-      index = 1;
-      employee = employeeCollection.at(index);
-      cid = employee.cid;
-      previous = employee.get('previousNeighbor');
-      next = employee.get('nextNeighbor');
-      employeeCollection.remove(employee);
-    });
-
-    it("should remove the model from the collection", function () {
-      expect(employeeCollection.getByCid(cid)).toBeUndefined();
-    });
-
-    it("should update the nextNeighbor attribute of the preceeding item", function () {
-      expect(previous.get('nextNeighbor')).toBe(next);
-    });
-
-    it("should update the previousNeighbor attribute of the next item", function () {
-      expect(next.get('previousNeighbor')).toBe(previous);
-    });
-
-  });
-
-  describe('destroying an existing model', function () {
-    var index,
-        employee,
-        previous,
-        next,
-        cid;
-
-    beforeEach(function () {
-      index = 1;
-      employee = employeeCollection.at(index);
-      cid = employee.cid;
-      previous = employee.get('previousNeighbor');
-      next = employee.get('nextNeighbor');
-      employee.destroy();
-    });
-
-    it("should remove the model from the collection", function () {
-      expect(employeeCollection.getByCid(cid)).toBeUndefined();
-    });
-    
-    it("should update the nextNeighbor attribute of the preceeding item", function () {
-      expect(previous.get('nextNeighbor')).toBe(next);
-    });
-    
-    it("should update the previousNeighbor attribute of the next item", function () {
-      expect(next.get('previousNeighbor')).toBe(previous);
-    });
-
-  });
-
 });

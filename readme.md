@@ -1,13 +1,17 @@
 ﻿# Backbone.Neighbors
 
-Backbone.Neighbors is a plugin for Backbone.js designed to make it easier to manage adjacent items 
-in a collection. Each model in the collection receives `previousNeighbor` and `nextNeighbor` properties,
-which are references to the items that come before and after the current item.
+Backbone.Neighbors is an extension for Backbone.js designed to make it easier to manage adjacent items 
+in a collection. It adds `next` and `previous` methods to the collection that return references to the items 
+that come before and after the current item.
 
 ## Usage
 
+Include the `backbone.neighbors.js` file after Backbone on your page. Call the `next` and `previous` methods with
+the current list item:
+
+	var nextItem = myCollection.next(currentModel); 
+
 ## Planned Features
-- Rework to put `previousNeighbor` and `nextNeighbor` methods on collection instead of model
 - Fix bug: Throws error when initializing collection with an array of models; need to handle `reset` method gracefully
 - only set neighbors if { neighbors: true } is passed
 - fire event when neighboring items are changed
